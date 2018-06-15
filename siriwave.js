@@ -105,8 +105,8 @@ SiriWaveCurve.prototype.draw = function() {
 	ctx.beginPath();
 	ctx.strokeStyle = 'rgba(' + this.controller.color + ',' + this.definition.opacity + ')';
 	ctx.lineWidth = this.definition.lineWidth;
-
-	for (var i = -2; i <= 2; i += 0.01) {
+	// changed i increments from 0.01 - for a smoother curve decrease it again 
+	for (var i = -2; i <= 2; i += 0.1) {
 		var y = this._ypos(i);
 
 		if (Math.abs(i) >= 1.90) y = this.controller.cache.height2;
@@ -258,9 +258,12 @@ SiriWave.prototype._startDrawCycle = function() {
 
 	this._draw();
 	this.phase = (this.phase + Math.PI * this.speed) % (2 * Math.PI);
-
+	var that = this;
 	if (window.requestAnimationFrame) {
-		window.requestAnimationFrame(this._startDrawCycle.bind(this));
+		setTimeout(function() {
+			window.requestAnimationFrame(this._startDrawCycle.bind(this));
+		}.bind(this), 1000/30);
+		// limited frame rate to 30fps to improve performance
 	} else {
 		setTimeout(this._startDrawCycle.bind(this), 20);
 	}
