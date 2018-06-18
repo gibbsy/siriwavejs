@@ -80,7 +80,6 @@ function SiriWaveCurve(opt) {
 	this.controller = opt.controller;
 	this.definition = opt.definition;
 	this.smoothness = opt.controller.smoothness;
-	console.log(this.smoothness)
 }
 
 SiriWaveCurve.prototype._globAttenuationEquation = function(x) {
@@ -170,11 +169,7 @@ function SiriWave(opt) {
 		opt.smoothness = (opt.smoothness < 1) ? 1 : opt.smoothness;
 	}
 	this.smoothness = (opt.smoothness == undefined) ? 0.01 : (11 - opt.smoothness) / 100;
-	console.log(this.smoothness);
-
 	this.fps = ( opt.fps == undefined ) ? 60 : opt.fps;
-	console.log(this.fps)
-	
 
 	// Interpolation
 
