@@ -72,6 +72,14 @@ The speed to interpolate the `speed` property.
 
 The speed to interpolate the `amplitude` property.
 
+#### `[fps]` (Number)
+
+Enter a number to throttle requestAnimationFrame using setTimeout. Enter 60 for no throttling.
+
+#### `[smoothness]` (Number, from `1` to `10`, default: `1`)
+
+1 for less smooth curve but better performance. 10 = max smoothness;
+
 ## API
 
 #### `start()`

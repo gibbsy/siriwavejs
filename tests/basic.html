@@ -7,5 +7,10 @@
 		amplitude: 1,
 		container: document.getElementById('container'),
 		autostart: true,
+		fps: 20,
+		smoothness: 1
 	});
+	setTimeout(() => {
+		SW.kill();
+	}, 5000);
 </script>

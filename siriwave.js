@@ -79,6 +79,8 @@ SiriWave9Curve.prototype.definition = [
 function SiriWaveCurve(opt) {
 	this.controller = opt.controller;
 	this.definition = opt.definition;
+	this.smoothness = opt.controller.smoothness;
+	console.log(this.smoothness)
 }
 
 SiriWaveCurve.prototype._globAttenuationEquation = function(x) {
@@ -133,6 +135,8 @@ function SiriWave(opt) {
 	this.phase = 0;
 	this.run = false;
 	this.cache = {};
+	this.useRAF = (window.requestAnimationFrame) ? true : false;
+	this.nextFrame = 0;
 
 	if (opt.container == null) {
 		console.warn("SiriWaveJS: no container defined, using body");
@@ -160,9 +164,17 @@ function SiriWave(opt) {
 	this.speed = (opt.speed == undefined) ? 0.2 : opt.speed;
 	this.frequency = (opt.frequency == undefined) ? 6 : opt.frequency;
 	this.color = this._hex2rgb(opt.color || '#fff');
-	this.frameRate = ( opt.frameRate == undefined ) ? 60 : opt.frameRate;
 	//smoothness of curves between 1-10
-	this.smoothness = ( opt.smoothness == undefined ) ? 0.01 : ( 11 - opt.smoothness )/100;
+	if (opt.smoothness != undefined) {
+		opt.smoothness = (opt.smoothness > 10) ? 10 : opt.smoothness;
+		opt.smoothness = (opt.smoothness < 1) ? 1 : opt.smoothness;
+	}
+	this.smoothness = (opt.smoothness == undefined) ? 0.01 : (11 - opt.smoothness) / 100;
+	console.log(this.smoothness);
+
+	this.fps = ( opt.fps == undefined ) ? 60 : opt.fps;
+	console.log(this.fps)
+	
 
 	// Interpolation
 
@@ -226,7 +238,7 @@ SiriWave.prototype._hex2rgb = function(hex){
 };
 
 SiriWave.prototype._interpolate = function(propertyStr) {
-	increment = this[ propertyStr + 'InterpolationSpeed' ];
+	var increment = this[ propertyStr + 'InterpolationSpeed' ];
 
 	if (Math.abs(this.cache.interpolation[propertyStr] - this[propertyStr]) <= increment) {
 		this[propertyStr] = this.cache.interpolation[propertyStr];
@@ -262,16 +274,16 @@ SiriWave.prototype._startDrawCycle = function() {
 	this._draw();
 	this.phase = (this.phase + Math.PI * this.speed) % (2 * Math.PI);
 	var that = this;
-	if (window.requestAnimationFrame) {
-		if( this.frameRate == 60 ) {
-			window.requestAnimationFrame(this._startDrawCycle.bind(this));
+	if (this.useRAF) {
+		if( this.fps == 60 ) {
+		 this.nextFrame =	window.requestAnimationFrame(this._startDrawCycle.bind(this));
 		} else {
 				setTimeout(function() {
-					window.requestAnimationFrame(this._startDrawCycle.bind(this));
-				}.bind(this), 1000/this.frameRate);
+					this.nextFrame = window.requestAnimationFrame(this._startDrawCycle.bind(this));
+				}.bind(this), 1000/this.fps);
 		}
 	} else {
-		setTimeout(this._startDrawCycle.bind(this), 20);
+		this.nextFrame = setTimeout(this._startDrawCycle.bind(this), 20);
 	}
 };
 
@@ -287,6 +299,17 @@ SiriWave.prototype.stop = function() {
 	this.phase = 0;
 	this.run = false;
 };
+
+SiriWave.prototype.kill = function() {
+	this.phase = 0;
+	this.run = false;
+	if (this.useRAF) {
+		window.cancelAnimationFrame(this.nextFrame);
+	}
+	else {
+		clearTimeout(this.nextFrame);
+	}
+}
 
 SiriWave.prototype.setSpeed = function(v, increment) {
 	this.cache.interpolation.speed = v;
